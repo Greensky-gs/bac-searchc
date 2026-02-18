@@ -114,11 +114,19 @@ static tResultat parse_one(FILE * file) {
 static int count_entries(FILE * file) {
 	int count = 0;
 	int i = 0;
+	int openers = 0;
 	int read;
 
 	while ((read = getc(file)) != EOF) {
-		if ((char)read == '}') count++;
+		if (read == '{') openers++;
+		if (read == '}') {
+			if (openers <= 0) return -1;
+			openers--;
+			count++;
+		}
 	}
+
+	if (openers != 0) return -1;
 
 	fseek(file, 0, SEEK_SET);
 
@@ -140,6 +148,7 @@ tResultat * parse(char * file_name, int * psize) {
 	if ((file = fopen(file_name, "rt")) == NULL) return NULL;
 
 	int entries = count_entries(file);
+	if (entries == -1) return NULL;
 	tResultat * array;
 	if ((array = malloc(sizeof(tResultat) * entries)) == NULL) return NULL;
 

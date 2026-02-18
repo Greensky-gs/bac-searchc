@@ -21,23 +21,59 @@ void trim(char * input) {
 	}
 }
 
+char * read_path() {
+	FILE * stream;
+	if ((stream = fopen("./path.txt", "rb")) == NULL) return NULL;
+
+	int i = 0, c;
+	while ((c = fgetc(stream)) != '\n' && c != EOF) {
+		i++;
+	}
+	fseek(stream, 0, SEEK_SET);
+
+	char * name;
+	if ((name = malloc((i + 1) * sizeof(char))) == NULL) {
+		fclose(stream);
+		return NULL;
+	}
+
+	if (fgets(name, i + 1, stream) == NULL) {
+		fclose(stream);
+		free(name);
+		return NULL;
+	}
+
+	fclose(stream);
+	return name;
+}
+
 int main() {
-	char * name = "/home/green/Documents/github/bac-scrap/data/copy.json";
+	char * name;
+	if ((name = read_path()) == NULL) {
+		printf("\x1b[31mPlease specify a \x1b[33mpath.txt\x1b[31m file containing a valid path to the file\x1b[0m\n");
+		return 1;
+	}
+
 	int count = 0;
 
 	char * line;
 	if ((line = malloc(sizeof(char) * LINE_MAX_SIZE)) == NULL) {
 		printf("Cannot allocate line buffer\n");
+		free(name);
 		return 3;
 	}
 
 	tResultat * array;
 	if ((array = parse(name, &count)) == NULL) {
 		printf("Error while parsing\n");
+		free(name);
+		free(line);
 		return 1;
 	}
 	if (count == 0) {
 		printf("No entry found\n");
+		free(name);
+		free(line);
 		return 2;
 	}
 
@@ -67,6 +103,7 @@ int main() {
 			free(cmd);
 			destroy_array(&array, count);
 			free(line);
+			free(name);
 			return 0;
 		}
 		if (next == NULL) {
@@ -114,5 +151,6 @@ int main() {
 
 	destroy_array(&array, count);
 	free(line);
+	free(name);
 	return 0;
 }
