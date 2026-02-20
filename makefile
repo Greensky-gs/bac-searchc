@@ -1,7 +1,7 @@
 CC=gcc
 FLAGS=-Wall -Wextra
 SANTS=-fsanitize=address,undefined -g
-OUTPUT=main.uwu
+OUTPUT=main.exe
 
 $(OUTPUT): build/main.o build/parser.o build/tools.o
 	$(CC) build/main.o build/parser.o build/tools.o $(FLAGS) $(SANTS) -o build/$(OUTPUT)
